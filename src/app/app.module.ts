@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { NgxEnvModule } from "@ngx-env/core";
 
 import { AppComponent } from './app.component';
 
@@ -8,7 +9,8 @@ import { AppComponent } from './app.component';
     AppComponent
   ],
   imports: [
-    BrowserModule
+    BrowserModule,
+    NgxEnvModule
   ],
   providers: [],
   bootstrap: [AppComponent]
