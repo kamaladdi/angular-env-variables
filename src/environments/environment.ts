@@ -2,8 +2,16 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import { Environment } from "./environment.model";
+
+const env: Environment  = {
+  NG_APP_ENV : window["env"]["NG_APP_ENV"],
+  NG_GOOGLE_MAPS_KEY: window["env"]["NG_GOOGLE_MAPS_KEY"],
+}
+
 export const environment = {
-  production: false
+  production: false,
+  env: env
 };
 
 /*
