@@ -1,0 +1,8 @@
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: angular-configmap 
+data:
+  # Configuration values can be set as key-value properties
+  NG_APP_ENV: PROD_KUBE_CONFIG
+  NG_GOOGLE_MAPS_KEY: KUBE_GOOGLE_KEY_8798452@AA

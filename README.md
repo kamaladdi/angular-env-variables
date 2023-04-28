@@ -14,7 +14,7 @@ $ node -e "console.log(process.env.NG_APP_ENV)"
 
 
 ## Kubernetes
-
+#### - Deployment
 ```bash
 # Load docker image to minikube images  
 $ minikube image load angular-env-variables:v1
@@ -22,30 +22,105 @@ $ minikube image list
  > docker.io/library/angular-env-variables:v1
 
 # Create the deployment
-$ kubectl create deployment angular-service --image=docker.io/library/angular-env-variables:v1 --dry-run=client -o yaml > k8s.yaml 
+$ cd k8s
+$ kubectl create deployment angular-app --image=docker.io/library/angular-env-variables:v1 --dry-run=client -o yaml > deployment.yaml
+```
+- deployment.yaml
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angular-app
+  template:
+    metadata:
+      labels:
+        app: angular-app
+    spec:
+      containers:
+      - image: docker.io/library/angular-env-variables:v1
+        name: angular-env-variables
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 80
+        env:
+        - name: NG_APP_ENV
+          value: PROD_KUBE
+        - name: NG_GOOGLE_MAPS_KEY
+          value: KUBE_GOOGLE_KEY_8798452
+```
 
+
+```bash
+# Before the apply check the deployment file to add more info and apply the deployment
+$ kubectl apply -f deployment
+# show the pod info
+$ kubectl get pods -l app=angular-app -o wide
+
+------------------------------------------------------------------------------------------------------------------------
+NAME                           READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
+angular-app-657ff99d8b-9n9j7   1/1     Running   0          5m30s   172.17.0.2   minikube   <none>           <none>
+------------------------------------------------------------------------------------------------------------------------
+```
+
+#### - Service
+```bash
 # Create the service
 $ echo --- >> k8s.yaml
-$ kubectl create service clusterip angular-service --tcp=8080:8080 --dry-run=client -o=yaml >> k8s.yaml
+$ kubectl create service clusterip angular-app --tcp=8080:8080 --dry-run=client -o=yaml >> service.yaml
+```
+- service.yaml
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-app
+  labels:
+    app: angular-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: angular-app
 
-# Apply changes
-$ kubectl apply -f k8s.yaml
+```
+
+### - Config map
+```bash
+$ kubectl apply -f config-map.yaml
+```
+
+#### - Port forward the service
+```bash
+$ kubectl port-forward service/angular-app 8080:80
+```
+
+
+# Show info
 $ kubectl get all
 
-----------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 | NAME                                  READY   STATUS    RESTARTS   AGE
-| pod/angular-service-9fcb5b8f7-m8ddz   1/1     Running   0          84s
+| pod/angular-app-9fcb5b8f7-m8ddz   1/1     Running   0          84s
 | 
 | NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-| service/angular-service   ClusterIP   10.110.253.247   <none>        8080/TCP   84s
+| service/angular-app   ClusterIP   10.110.253.247   <none>        8080/TCP   84s
 | service/kubernetes        ClusterIP   10.96.0.1        <none>        443/TCP    95d
 | 
 | NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
-| deployment.apps/angular-service   1/1     1            1           84s
+| deployment.apps/angular-app   1/1     1            1           84s
 | 
 | NAME                                        DESIRED   CURRENT   READY   AGE
-| replicaset.apps/angular-service-9fcb5b8f7   1         1         1       84s
-| -----------------------------------------------------------------------------------------
+| replicaset.apps/angular-app-9fcb5b8f7   1         1         1       84s
+------------------------------------------------------------------------------------------------------------------------
+
 
 
 
