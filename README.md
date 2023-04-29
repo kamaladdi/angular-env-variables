@@ -71,20 +71,22 @@ angular-app-657ff99d8b-9n9j7   1/1     Running   0          5m30s   172.17.0.2  
 ```bash
 # Create the service
 $ echo --- >> k8s.yaml
-$ kubectl create service clusterip angular-app --tcp=8080:8080 --dry-run=client -o=yaml >> service.yaml
+$ kubectl create service angular-app --tcp=8080:8080 --dry-run=client -o=yaml >> service.yaml
+#OR
+$ kubectl expose deployment angular-app --port=8001 --type=LoadBalancer
 ```
 - service.yaml
 ```yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: angular-app
+  name: angular-service
   labels:
-    app: angular-app
+    app: angular-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
-    - port: 80
+    - port: 8080
       protocol: TCP
       targetPort: 80
   selector:
@@ -97,9 +99,12 @@ spec:
 $ kubectl apply -f config-map.yaml
 ```
 
-#### - Port forward the service
+#### - Access to the kubernetes resources
 ```bash
-$ kubectl port-forward service/angular-app 8080:80
+# Port forward the service
+$ kubectl port-forward service/angular-service 8001:8001
+# Or expose the minikube service
+$ minikube service angular-service
 ```
 
 
